@@ -50,18 +50,17 @@ mod_defunc_cfg* cfg;
 int mod_defunc_getdefineval(char* define)
 {
 	const char* val = apr_table_get(cfg->mod_defunc_variables, define);
-	printf("Getting val for %s\n",define);
+//	printf("Getting val for %s\n",define);
 	if(val == NULL)
 		return 0;
 	else{
-		printf("Defineval %s = %d\n",define, strtol(val,NULL,0));
+//		printf("Defineval %s = %d\n",define, strtol(val,NULL,0));
 		return strtol(val, NULL, 0);
 	}
 }
 
 static void *mod_defunc_config(apr_pool_t* p, server_rec* s)
 {
-	//printf("----------*********--------- Interesting ----------*********---------\n");
 	cfg = apr_pcalloc(p, sizeof(mod_defunc_cfg));
 	if(cfg == NULL)
 		return NULL;
@@ -113,13 +112,12 @@ static const char* mod_defunc_ifdef(cmd_parms* cmd, void* dummy, char* arg)
 	if(endp != NULL)
 		*endp = '\0';
 	
-	printf("trying: %s\n", arg);
+//	printf("trying: %s\n", arg);
 	yy_scan_string(arg);
 	
 	if( !yyparse() ){
 		nestinglvl = 1;
 		while(nestinglvl && !ap_cfg_getline(line, MAX_LINE_LEN, cmd->config_file)){
-			printf("line skipped: %s\n", line);
 			if( !strncmp(line,"<IfDef", 6) )
 				nestinglvl+=1;
 			if( !strncmp(line,"</IfDef>", 8) )
@@ -141,10 +139,8 @@ static const char* mod_defunc_undef(cmd_parms* cmd, void* dummy, char* undef)
 {
 	int i, last;
 	char** defines;
-/*	printf("---secure---\n");
-	printf("etsz: %d\nnelts: %d\nneltalloc: %d\n",ap_server_config_defines->elt_size,
-			ap_server_config_defines->nelts, ap_server_config_defines->nalloc);
-*/			
+
+
 	defines = (char**)ap_server_config_defines->elts;	
 	last = ap_server_config_defines->nelts-1;
 	
@@ -161,14 +157,13 @@ static const char* mod_defunc_undef(cmd_parms* cmd, void* dummy, char* undef)
 			
 			ap_server_config_defines->nelts -= 1;
 		}
-//		printf("%d: 0x%X: %s\n", i, defines[i], defines[i]);
 	}
 	return NULL;
 }
 
 static command_rec mod_defunc_cmds[] = {
 	{ "Define", mod_defunc_define, NULL, EXEC_ON_READ|OR_ALL, TAKE12, "define stuff"},
-	{ "<IfDef", mod_defunc_ifdef, NULL,  EXEC_ON_READ|OR_ALL, RAW_ARGS, "dark magic starts here"},
+	{ "<IfDef", mod_defunc_ifdef, NULL,  EXEC_ON_READ|OR_ALL, RAW_ARGS, "Start of ifdef block"},
 	{ "</IfDef>", mod_defunc_ifdef_end, NULL, EXEC_ON_READ|OR_ALL, NO_ARGS, "dummy"},
 	{ "UnDef", mod_defunc_undef, NULL, EXEC_ON_READ|OR_ALL, TAKE1, "undefine value"},
 	{NULL}
