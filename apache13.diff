@@ -1,0 +1,101 @@
+25c25
+< 
+---
+>  
+28,29c28
+< #include "http_main.h"
+< #include "apr_strings.h"
+---
+> #include "http_conf_globals.h"
+37d35
+< 
+41c39
+< module AP_MODULE_DECLARE_DATA defunc_module;
+---
+> module MODULE_VAR_EXPORT defunc_module;
+44,45c42,43
+< 	apr_pool_t* defunc_pool;
+< 	apr_table_t* mod_defunc_variables;
+---
+> 	pool* defunc_pool;
+> 	table* mod_defunc_variables;
+52c50
+< 	const char* val = apr_table_get(cfg->mod_defunc_variables, define);
+---
+> 	const char* val = ap_table_get(cfg->mod_defunc_variables, define);
+62c60
+< static void *mod_defunc_config(apr_pool_t* p, server_rec* s)
+---
+> static void *mod_defunc_config(pool* p, server_rec* s)
+64,65c62
+< 	//printf("----------*********--------- Interesting ----------*********---------\n");
+< 	cfg = apr_pcalloc(p, sizeof(mod_defunc_cfg));
+---
+> 	cfg = ap_pcalloc(p, sizeof(mod_defunc_cfg));
+69c66,67
+< 	if( apr_pool_create(&cfg->defunc_pool, p) )
+---
+> 	cfg->defunc_pool = ap_make_sub_pool(p);
+> 	if(cfg->defunc_pool == NULL)
+72c70
+< 	cfg->mod_defunc_variables = apr_table_make(cfg->defunc_pool, 0);
+---
+> 	cfg->mod_defunc_variables = ap_make_table(cfg->defunc_pool, 0);
+90,91c88,89
+< 		newdef = (char **)apr_array_push(ap_server_config_defines);
+<     	*newdef = apr_pstrdup(cfg->defunc_pool, define);
+---
+> 		newdef = (char **)ap_push_array(ap_server_config_defines);
+> 		*newdef = ap_pstrdup(cfg->defunc_pool, define);
+95c93
+< 		apr_table_set(cfg->mod_defunc_variables, define, DEFAULT_VAL);
+---
+> 		ap_table_set(cfg->mod_defunc_variables, define, DEFAULT_VAL);
+100c98
+< 		apr_table_set(cfg->mod_defunc_variables, define, tmp);
+---
+> 		ap_table_set(cfg->mod_defunc_variables, define, tmp);
+111c109
+< 
+---
+> 	
+170,173c168,171
+< 	{ "Define", mod_defunc_define, NULL, EXEC_ON_READ|OR_ALL, TAKE12, "define stuff"},
+< 	{ "<IfDef", mod_defunc_ifdef, NULL,  EXEC_ON_READ|OR_ALL, RAW_ARGS, "dark magic starts here"},
+< 	{ "</IfDef>", mod_defunc_ifdef_end, NULL, EXEC_ON_READ|OR_ALL, NO_ARGS, "dummy"},
+< 	{ "UnDef", mod_defunc_undef, NULL, EXEC_ON_READ|OR_ALL, TAKE1, "undefine value"},
+---
+> 	{ "Define", mod_defunc_define, NULL, OR_ALL, TAKE12, "define stuff"},
+> 	{ "<IfDef", mod_defunc_ifdef, NULL,  OR_ALL, RAW_ARGS, "dark magic starts here"},
+> 	{ "</IfDef>", mod_defunc_ifdef_end, NULL, OR_ALL, NO_ARGS, "dummy"},
+> 	{ "UnDef", mod_defunc_undef, NULL, OR_ALL, TAKE1, "undefine value"},
+177,184c175,194
+< module AP_MODULE_DECLARE_DATA defunc_module = {
+<     STANDARD20_MODULE_STUFF,
+<     NULL,                     /* create per-directory config structure */
+<     NULL,                     /* merge per-directory config structures */
+<     mod_defunc_config, 		  /* create per-server config structure */
+<     NULL,                     /* merge per-server config structures */
+<     mod_defunc_cmds,          /* command handlers */
+<     NULL			          /* register hooks */
+---
+> module MODULE_VAR_EXPORT defunc_module = {
+>     STANDARD_MODULE_STUFF,
+>     NULL,			                   /* initializer */
+>     NULL,                              /* dir config creator */
+>     NULL,                              /* dir config merger */
+>     mod_defunc_config,                  /* server config */
+>     NULL,                              /* merge server config */
+>     mod_defunc_cmds,                   /* command table */
+>     NULL,                              /* handlers */
+>     NULL,                              /* filename translation */
+>     NULL,                              /* check_user_id */
+>     NULL,                              /* check auth */
+>     NULL,                              /* check access */
+>     NULL,                              /* type_checker */
+>     NULL,			                   /* fixups */
+>     NULL,                              /* logger */
+>     NULL,                              /* header parser */
+>     NULL,                              /* child_init */
+> 	NULL,                              /* child_exit */
+>     NULL                               /* post read-request */
